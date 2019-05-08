@@ -122,5 +122,33 @@ def checkout(cart, coupons)
   end
 
   puts sum
+
+  # Consolidate Cart
+  cart = [cart]
+
+  entry_counts = cart.group_by { |entry| entry }.map { |item, details| [item, details.count] }
+  entry_counts.each { |elem|
+    elem[0].each_key { |k|
+      cart.each { |entry|
+        entry.each { |item, details|
+          if item == k
+            details[:count] = elem[1]
+          end
+        }
+      }
+    }
+  }
+
+  intermediate = cart.uniq
+  return_obj = {}
+
+  intermediate.each { |elem|
+    elem.each { |k, v|
+      return_obj[k] = v
+    }
+  }
+
+  cart = return_obj
+
   return cart
 end
