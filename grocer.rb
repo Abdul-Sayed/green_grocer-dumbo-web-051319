@@ -77,5 +77,50 @@ end
 ##########################################################
 
 def checkout(cart, coupons)
-  # code here
+
+  # Apply Coupons Method
+  if coupons.length > 0
+    num_extra_coupons = 0
+
+    if coupons.uniq.length == coupons.length
+      puts "coupons does not contain duplicates"
+    else
+      duplicates = coupons.group_by { |e| e }.keep_if { |_, e| e.length > 1 }.map { |k, v| { k => v.length } }
+      duplicates[0].each { |k, v| num_extra_coupons = v - 1 }
+    end
+
+    coupons.each { |coupon|
+      sale_item = coupon[:item]
+      num_sale_items = coupon[:num]
+
+      if cart.has_key?(sale_item)
+        num_items = cart[sale_item][:count]
+        cart[sale_item][:count] -= num_sale_items
+
+        cart["#{sale_item} W/COUPON"] = {}.merge!(price: coupon[:cost], clearance: cart[coupon[:item]][:clearance], count: (num_items / coupon[:num]) + num_extra_coupons)
+      end
+    }
+  end
+
+  # Apply Clearance Method
+  cart.each { |item, info|
+    if (info[:clearance] == true)
+      info[:price] = (info[:price] * 0.8).round(4).truncate(3)
+    end
+  }
+
+  # Calculate Total
+  sum = 0
+  cart.each { |item, info|
+    sum += info[:price] * info[:count]
+  }
+
+  if sum > 100
+    cart.each { |item, info|
+      info[:price] = (info[:price] * 0.9).round(4).truncate(3)
+    }
+  end
+
+  puts sum
+  return cart
 end
