@@ -66,7 +66,12 @@ end
 ###########################################################
 
 def apply_clearance(cart)
-  # code here
+  cart.each { |item, info|
+		if (info[:clearance] == true)
+			info[:price] = (info[:price] * 0.8).round(4).truncate(4)
+		end
+	}
+	return cart
 end
 
 ##########################################################
